@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	RootCmd.PersistentFlags().String("targetDir", "", "Set target directory.")
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", os.Args[0], err)
 		os.Exit(-1)
@@ -19,7 +20,16 @@ var RootCmd = &cobra.Command{
 	Use:   "culc",
 	Short: "command line calculator",
 	Run: func(cmd *cobra.Command, args []string) {
-		var targetDir = "test-files/"
+
+		targetDir, err := cmd.PersistentFlags().GetString("targetDir")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if targetDir == "" {
+			fmt.Print("TargetDir must be set.")
+			return
+		}
 
 		files, err := ioutil.ReadDir(targetDir)
 		if err != nil {
