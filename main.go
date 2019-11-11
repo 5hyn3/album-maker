@@ -28,7 +28,6 @@ var RootCmd = &cobra.Command{
 
 		var paths []string
 
-		// http://pineplanter.moo.jp/non-it-salaryman/2017/08/22/golang-file-list/
 		for _, file := range files {
 			if !file.IsDir() {
 				paths = append(paths, file.Name())
