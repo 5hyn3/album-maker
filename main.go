@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -45,21 +46,28 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		var wg sync.WaitGroup
 		for _, path := range paths {
-			from := targetDir + path
-			fileStat, err := os.Stat(from)
-			if err != nil {
-				log.Fatal(err)
-			}
-			var moveToDir = targetDir + fileStat.ModTime().Format("2006/01/02")
-			if err := os.MkdirAll(moveToDir, 0777); err != nil {
-				log.Fatal(err)
-			}
-
-			err = os.Rename(from, moveToDir+"/"+path)
-			if err != nil {
-				log.Fatal(err)
-			}
+			wg.Add(1)
+			go moveFileToModTimeDirectory(targetDir, path, &wg)
 		}
+		wg.Wait()
 	},
+}
+
+func moveFileToModTimeDirectory(targetDir string, path string, wg *sync.WaitGroup) {
+	from := targetDir + "/" + path
+	fileStat, err := os.Stat(from)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var moveToDir = targetDir + fileStat.ModTime().Format("2006/01/02")
+	if err := os.MkdirAll(moveToDir, 0777); err != nil {
+		log.Fatal(err)
+	}
+	err = os.Rename(from, moveToDir+"/"+path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	wg.Done()
 }
