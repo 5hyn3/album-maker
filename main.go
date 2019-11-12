@@ -17,8 +17,9 @@ func main() {
 }
 
 var RootCmd = &cobra.Command{
-	Use:   "culc",
-	Short: "command line calculator",
+	Use:   "album maker",
+	// ファイル（主に画像）を最終変更日を元にディレクトリ分け整理します。
+	Short: "Organize files (mainly images) by dividing them into directories based on the last modification date.",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		targetDir, err := cmd.PersistentFlags().GetString("targetDir")
