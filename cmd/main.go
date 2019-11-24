@@ -61,7 +61,7 @@ func moveFileToModTimeDirectory(targetDir string, path string, wg *sync.WaitGrou
 	if err != nil {
 		log.Fatal(err)
 	}
-	var moveToDir = targetDir + fileStat.ModTime().Format("2006/01/02")
+	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
 	if err := os.MkdirAll(moveToDir, 0777); err != nil {
 		log.Fatal(err)
 	}
