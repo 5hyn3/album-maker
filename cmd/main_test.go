@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -15,7 +14,7 @@ var testFileNames = []string{
 	"test2",
 }
 
-func TestMai(t *testing.T) {
+func TestIntegrate(t *testing.T) {
 	err := setUp()
 	if err != nil {
 		panic(err)
@@ -27,10 +26,8 @@ func TestMai(t *testing.T) {
 	var todayDir = time.Now().Format("2006/01/02")
 	for _, n := range testFileNames {
 		var target = targetDirName + "/" + todayDir+"/"+n
-		if fileExists(target) {
-			fmt.Printf("PASS: %s\n", target)
-		} else {
-			fmt.Printf("FAIL: %s\n", target)
+		if !fileExists(target) {
+			t.Fatalf("FAIL: %s\n", target)
 		}
 	}
 
