@@ -1,3 +1,9 @@
+![](https://github.com/5hyn3/album-maker/workflows/Go/badge.svg)
+
+<p align="left">
+  <a href="https://github.com/5hyn3/album-maker/actions?query=workflow%3AGo"><img alt="GitHub Actions status" src="https://github.com/5hyn3/album-maker/workflows/Go/badge.svg"></a>
+</p>
+
 # album-maker
 album maker 
 
