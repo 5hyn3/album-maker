@@ -1,4 +1,4 @@
-package main
+package albummaker
 
 import (
 	"os"
@@ -14,14 +14,19 @@ var testFileNames = []string{
 	"test2",
 }
 
-func TestIntegrate(t *testing.T) {
+func TestNewCommand(t *testing.T) {
 	err := setUp()
 	if err != nil {
 		panic(err)
 	}
 	var args = []string{"--targetDir=" + targetDirName}
-	RootCmd.SetArgs(args)
-	main()
+	var cmd = NewCommand()
+	cmd.SetArgs(args)
+
+	err = cmd.Execute()
+	if err != nil {
+		panic(err)
+	}
 
 	var todayDir = time.Now().Format("2006/01/02")
 	for _, n := range testFileNames {

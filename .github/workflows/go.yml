@@ -32,4 +32,4 @@ jobs:
       run: go build -v ./cmd/album-maker
       
     - name: Test
-      run: go test -v ./cmd/album-maker
+      run: go test -v github.com/5hyn3/album-maker/...
