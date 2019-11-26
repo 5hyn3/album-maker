@@ -14,7 +14,7 @@ func NewCommand() *cobra.Command {
 		Use: "album maker",
 		// ファイル（主に画像）を最終変更日を元にディレクトリ分け整理します。
 		Short: "Organize files (mainly images) by dividing them into directories based on the last modification date.",
-		Run: makeAlbum,
+		Run:   makeAlbum,
 	}
 	c.PersistentFlags().String("targetDir", "", "Set target directory.")
 	return c
@@ -54,6 +54,6 @@ func moveFileToModTimeDirectory(targetDir string, path string, wg *sync.WaitGrou
 	cmd.CheckError(err)
 	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
 	cmd.CheckError(os.MkdirAll(moveToDir, 0777))
-	cmd.CheckError(os.Rename(from, moveToDir + "/" + path))
+	cmd.CheckError(os.Rename(from, moveToDir+"/"+path))
 	wg.Done()
 }

@@ -1,9 +1,9 @@
 package cmd
 
 import (
-"context"
-"fmt"
-"os"
+	"context"
+	"fmt"
+	"os"
 )
 
 func CheckError(err error) {

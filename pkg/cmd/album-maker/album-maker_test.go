@@ -29,7 +29,7 @@ func TestNewCommand(t *testing.T) {
 
 	var todayDir = time.Now().Format("2006/01/02")
 	for _, n := range testFileNames {
-		var target = targetDirName + "/" + todayDir+"/"+n
+		var target = targetDirName + "/" + todayDir + "/" + n
 		if !fileExists(target) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
