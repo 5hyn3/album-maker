@@ -24,7 +24,7 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
     
     - name: Get dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-gomod.outputs.cache-hit != 'true'
       run: |
         go mod download
 
