@@ -15,16 +15,15 @@ var testFileNames = []string{
 }
 
 func TestNewCommand(t *testing.T) {
-	err := setUp()
-	if err != nil {
+	if err := setUp(); err != nil {
 		panic(err)
 	}
+
 	var args = []string{"--targetDir=" + targetDirName}
 	var cmd = NewCommand()
 	cmd.SetArgs(args)
 
-	err = cmd.Execute()
-	if err != nil {
+	if err := cmd.Execute(); err != nil {
 		panic(err)
 	}
 
@@ -36,8 +35,7 @@ func TestNewCommand(t *testing.T) {
 		}
 	}
 
-	err = tearDown()
-	if err != nil {
+	if err := tearDown(); err != nil {
 		panic(err)
 	}
 }
