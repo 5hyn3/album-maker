@@ -4,7 +4,13 @@
   <a href="https://github.com/5hyn3/album-maker/actions?query=workflow%3AGo"><img alt="GitHub Actions status" src="https://github.com/5hyn3/album-maker/workflows/Go/badge.svg"></a>
 </p>
 
-album maker 
+## Installation
+
+```bash
+go get -u github.com/5hyn3/album-maker/cmd/album-maker
+```
+
+## Example
 
 ```
 target-dir/
