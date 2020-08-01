@@ -1,11 +1,15 @@
 package albummaker
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/5hyn3/album-maker/pkg/cmd"
 	"github.com/spf13/cobra"
+	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -29,6 +33,9 @@ func makeAlbum(c *cobra.Command, args []string) {
 	targetDir, err := c.PersistentFlags().GetString("targetDir")
 	cmd.CheckError(err)
 
+	addMd5Suffix, err := c.PersistentFlags().GetBool("addMd5Suffix")
+	cmd.CheckError(err)
+
 	if targetDir == "" {
 		fmt.Print("TargetDir must be set.")
 		return
@@ -48,17 +55,40 @@ func makeAlbum(c *cobra.Command, args []string) {
 	var wg sync.WaitGroup
 	for _, path := range paths {
 		wg.Add(1)
-		go moveFileToModTimeDirectory(targetDir, path, &wg)
+		go moveFileToModTimeDirectory(targetDir, path, addMd5Suffix, &wg)
 	}
 	wg.Wait()
 }
 
-func moveFileToModTimeDirectory(targetDir string, path string, wg *sync.WaitGroup) {
+func moveFileToModTimeDirectory(targetDir string, path string, addMd5Suffix bool, wg *sync.WaitGroup) {
 	from := targetDir + "/" + path
 	fileStat, err := os.Stat(from)
 	cmd.CheckError(err)
 	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
 	cmd.CheckError(os.MkdirAll(moveToDir, 0777))
-	cmd.CheckError(os.Rename(from, moveToDir+"/"+path))
+	var newName string
+	if addMd5Suffix {
+		f, err := os.Open(from)
+		if err != nil {
+			panic(err)
+		}
+
+		h := md5.New()
+		if _, err := io.Copy(h, f); err != nil {
+			panic(err)
+		}
+
+		err = f.Close()
+		if err != nil {
+			panic(err)
+		}
+
+		ext := filepath.Ext(path)
+		base := path[:len(path) - len(ext)]
+		newName = moveToDir + "/" + base + "_" + hex.EncodeToString(h.Sum(nil)) + ext
+	} else {
+		newName = moveToDir + "/" + path
+	}
+	cmd.CheckError(os.Rename(from, newName))
 	wg.Done()
 }

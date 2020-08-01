@@ -115,8 +115,6 @@ func addMd5SuffixPassedTruePattern(t *testing.T) {
 	for _, n := range testFileNames {
 		ext := filepath.Ext(n)
 		base := n[:len(n) - len(ext)]
-		println(base)
-		println(ext)
 		var target = targetDirName + "/" + todayDir + "/" + base + "_" + nameToMd5[n] + ext
 		if !fileExists(target) {
 			t.Fatalf("FAIL: %s\n", target)
