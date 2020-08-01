@@ -17,6 +17,11 @@ func NewCommand() *cobra.Command {
 		Run:   makeAlbum,
 	}
 	c.PersistentFlags().String("targetDir", "", "Set target directory.")
+	c.PersistentFlags().Bool(
+		"addMd5Suffix",
+		false,
+		"Set the suffix of the original file name to include the md5 calculated from the file.",
+		)
 	return c
 }
 
