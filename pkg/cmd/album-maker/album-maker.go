@@ -26,7 +26,7 @@ func NewCommand() *cobra.Command {
 		"suffixMode",
 		"nothing",
 		"Set suffix mode.",
-		)
+	)
 	return c
 }
 
@@ -70,7 +70,7 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity
 	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
 	cmd.CheckError(os.MkdirAll(moveToDir, 0777))
 	ext := filepath.Ext(path)
-	base := path[:len(path) - len(ext)]
+	base := path[:len(path)-len(ext)]
 	suffix := ""
 	switch suffixMode {
 	case entity.MD5:
@@ -98,6 +98,6 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity
 	default:
 	}
 
-	cmd.CheckError(os.Rename(from, moveToDir + "/" + base + suffix + ext))
+	cmd.CheckError(os.Rename(from, moveToDir+"/"+base+suffix+ext))
 	wg.Done()
 }

@@ -115,7 +115,7 @@ func suffixModeEqualMd5Pattern(t *testing.T) {
 	var todayDir = time.Now().Format("2006/01/02")
 	for _, n := range testFileNames {
 		ext := filepath.Ext(n)
-		base := n[:len(n) - len(ext)]
+		base := n[:len(n)-len(ext)]
 		var target = targetDirName + "/" + todayDir + "/" + base + "_" + nameToMd5[n] + ext
 		if !fileExists(target) {
 			t.Fatalf("FAIL: %s\n", target)
@@ -155,7 +155,7 @@ func suffixModeEqualDateTimePattern(t *testing.T) {
 	var todayDir = time.Now().Format("2006/01/02")
 	for _, n := range testFileNames {
 		ext := filepath.Ext(n)
-		base := n[:len(n) - len(ext)]
+		base := n[:len(n)-len(ext)]
 		dateTime := nameToDateTime[n]
 		var target = targetDirName + "/" + todayDir + "/" + base + "_" + dateTime + ext
 		if !fileExists(target) {
