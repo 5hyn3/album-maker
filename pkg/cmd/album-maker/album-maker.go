@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/5hyn3/album-maker/internal/album-maker/entity"
 	"github.com/5hyn3/album-maker/pkg/cmd"
 	"github.com/spf13/cobra"
 	"io"
@@ -21,10 +22,10 @@ func NewCommand() *cobra.Command {
 		Run:   makeAlbum,
 	}
 	c.PersistentFlags().String("targetDir", "", "Set target directory.")
-	c.PersistentFlags().Bool(
-		"addMd5Suffix",
-		false,
-		"Set the suffix of the original file name to include the md5 calculated from the file.",
+	c.PersistentFlags().String(
+		"suffixMode",
+		"nothing",
+		"Set suffix mode.",
 		)
 	return c
 }
@@ -33,8 +34,10 @@ func makeAlbum(c *cobra.Command, args []string) {
 	targetDir, err := c.PersistentFlags().GetString("targetDir")
 	cmd.CheckError(err)
 
-	addMd5Suffix, err := c.PersistentFlags().GetBool("addMd5Suffix")
+	suffixMode, err := c.PersistentFlags().GetString("suffixMode")
 	cmd.CheckError(err)
+
+	mode := entity.NewSuffixMode(suffixMode)
 
 	if targetDir == "" {
 		fmt.Print("TargetDir must be set.")
@@ -55,19 +58,22 @@ func makeAlbum(c *cobra.Command, args []string) {
 	var wg sync.WaitGroup
 	for _, path := range paths {
 		wg.Add(1)
-		go moveFileToModTimeDirectory(targetDir, path, addMd5Suffix, &wg)
+		go moveFileToModTimeDirectory(targetDir, path, mode, &wg)
 	}
 	wg.Wait()
 }
 
-func moveFileToModTimeDirectory(targetDir string, path string, addMd5Suffix bool, wg *sync.WaitGroup) {
+func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity.SuffixMode, wg *sync.WaitGroup) {
 	from := targetDir + "/" + path
 	fileStat, err := os.Stat(from)
 	cmd.CheckError(err)
 	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
 	cmd.CheckError(os.MkdirAll(moveToDir, 0777))
-	var newName string
-	if addMd5Suffix {
+	ext := filepath.Ext(path)
+	base := path[:len(path) - len(ext)]
+	suffix := ""
+	switch suffixMode {
+	case entity.MD5:
 		f, err := os.Open(from)
 		if err != nil {
 			panic(err)
@@ -82,13 +88,16 @@ func moveFileToModTimeDirectory(targetDir string, path string, addMd5Suffix bool
 		if err != nil {
 			panic(err)
 		}
-
-		ext := filepath.Ext(path)
-		base := path[:len(path) - len(ext)]
-		newName = moveToDir + "/" + base + "_" + hex.EncodeToString(h.Sum(nil)) + ext
-	} else {
-		newName = moveToDir + "/" + path
+		suffix = "_" + hex.EncodeToString(h.Sum(nil))
+	case entity.DateTime:
+		fileStat, err := os.Stat(from)
+		if err != nil {
+			panic(err)
+		}
+		suffix = "_" + fileStat.ModTime().Format("2006-01-02-15-04-05")
+	default:
 	}
-	cmd.CheckError(os.Rename(from, newName))
+
+	cmd.CheckError(os.Rename(from, moveToDir + "/" + base + suffix + ext))
 	wg.Done()
 }

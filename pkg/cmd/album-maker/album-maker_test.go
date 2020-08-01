@@ -19,12 +19,13 @@ var testFileNames = []string{
 }
 
 func TestNewCommand(t *testing.T) {
-	addMd5SuffixNotPassedPattern(t)
-	addMd5SuffixPassedFalsePattern(t)
-	addMd5SuffixPassedTruePattern(t)
+	notPassedSuffixModePattern(t)
+	suffixModeEqualNothingPattern(t)
+	suffixModeEqualMd5Pattern(t)
+	suffixModeEqualDateTimePattern(t)
 }
 
-func addMd5SuffixNotPassedPattern(t *testing.T) {
+func notPassedSuffixModePattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
@@ -50,12 +51,12 @@ func addMd5SuffixNotPassedPattern(t *testing.T) {
 	}
 }
 
-func addMd5SuffixPassedFalsePattern(t *testing.T) {
+func suffixModeEqualNothingPattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
 
-	var args = []string{"--targetDir=" + targetDirName, "--addMd5Suffix=false"}
+	var args = []string{"--targetDir=" + targetDirName, "--suffixMode=nothing"}
 	var cmd = NewCommand()
 	cmd.SetArgs(args)
 
@@ -76,7 +77,7 @@ func addMd5SuffixPassedFalsePattern(t *testing.T) {
 	}
 }
 
-func addMd5SuffixPassedTruePattern(t *testing.T) {
+func suffixModeEqualMd5Pattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
@@ -103,7 +104,7 @@ func addMd5SuffixPassedTruePattern(t *testing.T) {
 		nameToMd5[n] = hash
 	}
 
-	var args = []string{"--targetDir=" + targetDirName, "--addMd5Suffix=true"}
+	var args = []string{"--targetDir=" + targetDirName, "--suffixMode=md5"}
 	var cmd = NewCommand()
 	cmd.SetArgs(args)
 
@@ -116,6 +117,47 @@ func addMd5SuffixPassedTruePattern(t *testing.T) {
 		ext := filepath.Ext(n)
 		base := n[:len(n) - len(ext)]
 		var target = targetDirName + "/" + todayDir + "/" + base + "_" + nameToMd5[n] + ext
+		if !fileExists(target) {
+			t.Fatalf("FAIL: %s\n", target)
+		}
+	}
+
+	if err := tearDown(); err != nil {
+		panic(err)
+	}
+}
+
+func suffixModeEqualDateTimePattern(t *testing.T) {
+	if err := setUp(); err != nil {
+		panic(err)
+	}
+
+	var nameToDateTime = map[string]string{}
+	for _, n := range testFileNames {
+		target := targetDirName + "/" + n
+		fileStat, err := os.Stat(target)
+		if err != nil {
+			panic(err)
+		}
+		var dateTime = fileStat.ModTime().Format("2006-01-02-15-04-05")
+
+		nameToDateTime[n] = dateTime
+	}
+
+	var args = []string{"--targetDir=" + targetDirName, "--suffixMode=dateTime"}
+	var cmd = NewCommand()
+	cmd.SetArgs(args)
+
+	if err := cmd.Execute(); err != nil {
+		panic(err)
+	}
+
+	var todayDir = time.Now().Format("2006/01/02")
+	for _, n := range testFileNames {
+		ext := filepath.Ext(n)
+		base := n[:len(n) - len(ext)]
+		dateTime := nameToDateTime[n]
+		var target = targetDirName + "/" + todayDir + "/" + base + "_" + dateTime + ext
 		if !fileExists(target) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
