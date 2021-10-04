@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/5hyn3/album-maker/cmd/album-maker
+go install github.com/5hyn3/album-maker/cmd/album-maker
 ```
 
 ## Example

@@ -1,4 +1,4 @@
-package entity
+package albummaker
 
 type SuffixMode int
 

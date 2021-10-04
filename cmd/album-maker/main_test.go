@@ -1,4 +1,4 @@
-package albummaker
+package main
 
 import (
 	"crypto/md5"

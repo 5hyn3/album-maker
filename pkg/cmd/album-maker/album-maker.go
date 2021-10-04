@@ -3,47 +3,16 @@ package albummaker
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
-	"github.com/5hyn3/album-maker/internal/album-maker/entity"
-	"github.com/5hyn3/album-maker/pkg/cmd"
-	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/5hyn3/album-maker/pkg/cmd"
 )
 
-func NewCommand() *cobra.Command {
-	var c = &cobra.Command{
-		Use: "album maker",
-		// ファイル（主に画像）を最終変更日を元にディレクトリ分け整理します。
-		Short: "Organize files (mainly images) by dividing them into directories based on the last modification date.",
-		Run:   makeAlbum,
-	}
-	c.PersistentFlags().String("targetDir", "", "Set target directory.")
-	c.PersistentFlags().String(
-		"suffixMode",
-		"nothing",
-		"Set suffix mode.",
-	)
-	return c
-}
-
-func makeAlbum(c *cobra.Command, args []string) {
-	targetDir, err := c.PersistentFlags().GetString("targetDir")
-	cmd.CheckError(err)
-
-	suffixMode, err := c.PersistentFlags().GetString("suffixMode")
-	cmd.CheckError(err)
-
-	mode := entity.NewSuffixMode(suffixMode)
-
-	if targetDir == "" {
-		fmt.Print("TargetDir must be set.")
-		return
-	}
-
+func MoveFilesToModTimeDirectory(targetDir string, mode SuffixMode) {
 	files, err := ioutil.ReadDir(targetDir)
 	cmd.CheckError(err)
 
@@ -63,7 +32,7 @@ func makeAlbum(c *cobra.Command, args []string) {
 	wg.Wait()
 }
 
-func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity.SuffixMode, wg *sync.WaitGroup) {
+func moveFileToModTimeDirectory(targetDir string, path string, suffixMode SuffixMode, wg *sync.WaitGroup) {
 	from := targetDir + "/" + path
 	fileStat, err := os.Stat(from)
 	cmd.CheckError(err)
@@ -73,7 +42,7 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity
 	base := path[:len(path)-len(ext)]
 	suffix := ""
 	switch suffixMode {
-	case entity.MD5:
+	case MD5:
 		f, err := os.Open(from)
 		if err != nil {
 			panic(err)
@@ -89,7 +58,7 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode entity
 			panic(err)
 		}
 		suffix = "_" + hex.EncodeToString(h.Sum(nil))
-	case entity.DateTime:
+	case DateTime:
 		fileStat, err := os.Stat(from)
 		if err != nil {
 			panic(err)
