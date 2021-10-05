@@ -43,5 +43,6 @@ func makeAlbum(c *cobra.Command, args []string) {
 		return
 	}
 
-	albummaker.MoveFilesToModTimeDirectory(targetDir, mode)
+	err = albummaker.MoveFilesToModTimeDirectory(targetDir, mode)
+	cmd.CheckError(err)
 }

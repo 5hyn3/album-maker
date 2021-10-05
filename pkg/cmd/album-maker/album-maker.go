@@ -3,18 +3,19 @@ package albummaker
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"golang.org/x/sync/errgroup"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sync"
-
-	"github.com/5hyn3/album-maker/pkg/cmd"
 )
 
-func MoveFilesToModTimeDirectory(targetDir string, mode SuffixMode) {
+func MoveFilesToModTimeDirectory(targetDir string, mode SuffixMode) error {
 	files, err := ioutil.ReadDir(targetDir)
-	cmd.CheckError(err)
+
+	if err != nil {
+		return err
+	}
 
 	var paths []string
 
@@ -24,20 +25,33 @@ func MoveFilesToModTimeDirectory(targetDir string, mode SuffixMode) {
 		}
 	}
 
-	var wg sync.WaitGroup
+	eg := errgroup.Group{}
 	for _, path := range paths {
-		wg.Add(1)
-		go moveFileToModTimeDirectory(targetDir, path, mode, &wg)
+		path := path
+		eg.Go(func() error {
+			return moveFileToModTimeDirectory(targetDir, path, mode)
+		})
 	}
-	wg.Wait()
+	err = eg.Wait()
+	if  err != nil {
+		return err
+	}
+	return nil
 }
 
-func moveFileToModTimeDirectory(targetDir string, path string, suffixMode SuffixMode, wg *sync.WaitGroup) {
+func moveFileToModTimeDirectory(targetDir string, path string, suffixMode SuffixMode) error {
 	from := targetDir + "/" + path
 	fileStat, err := os.Stat(from)
-	cmd.CheckError(err)
+	if err != nil {
+		return err
+	}
+
 	var moveToDir = targetDir + "/" + fileStat.ModTime().Format("2006/01/02")
-	cmd.CheckError(os.MkdirAll(moveToDir, 0777))
+	err = os.MkdirAll(moveToDir, 0777)
+	if err != nil {
+		return err
+	}
+
 	ext := filepath.Ext(path)
 	base := path[:len(path)-len(ext)]
 	suffix := ""
@@ -45,7 +59,7 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode Suffix
 	case MD5:
 		f, err := os.Open(from)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		h := md5.New()
@@ -55,18 +69,21 @@ func moveFileToModTimeDirectory(targetDir string, path string, suffixMode Suffix
 
 		err = f.Close()
 		if err != nil {
-			panic(err)
+			return err
 		}
 		suffix = "_" + hex.EncodeToString(h.Sum(nil))
 	case DateTime:
 		fileStat, err := os.Stat(from)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		suffix = "_" + fileStat.ModTime().Format("2006-01-02-15-04-05")
 	default:
 	}
 
-	cmd.CheckError(os.Rename(from, moveToDir+"/"+base+suffix+ext))
-	wg.Done()
+	err = os.Rename(from, moveToDir+"/"+base+suffix+ext)
+	if err != nil {
+		return err
+	}
+	return nil
 }

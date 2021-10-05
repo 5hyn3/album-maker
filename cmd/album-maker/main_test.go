@@ -18,17 +18,11 @@ var testFileNames = []string{
 	"test2.txt",
 }
 
-func TestNewCommand(t *testing.T) {
-	notPassedSuffixModePattern(t)
-	suffixModeEqualNothingPattern(t)
-	suffixModeEqualMd5Pattern(t)
-	suffixModeEqualDateTimePattern(t)
-}
-
-func notPassedSuffixModePattern(t *testing.T) {
+func TestNotPassedSuffixModePattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
+	defer tearDown()
 
 	var args = []string{"--targetDir=" + targetDirName}
 	var cmd = NewCommand()
@@ -45,16 +39,13 @@ func notPassedSuffixModePattern(t *testing.T) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
 	}
-
-	if err := tearDown(); err != nil {
-		panic(err)
-	}
 }
 
-func suffixModeEqualNothingPattern(t *testing.T) {
+func TestSuffixModeEqualNothingPattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
+	defer tearDown()
 
 	var args = []string{"--targetDir=" + targetDirName, "--suffixMode=nothing"}
 	var cmd = NewCommand()
@@ -71,16 +62,13 @@ func suffixModeEqualNothingPattern(t *testing.T) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
 	}
-
-	if err := tearDown(); err != nil {
-		panic(err)
-	}
 }
 
-func suffixModeEqualMd5Pattern(t *testing.T) {
+func TestSuffixModeEqualMd5Pattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
+	defer tearDown()
 
 	var nameToMd5 = map[string]string{}
 	for _, n := range testFileNames {
@@ -121,16 +109,13 @@ func suffixModeEqualMd5Pattern(t *testing.T) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
 	}
-
-	if err := tearDown(); err != nil {
-		panic(err)
-	}
 }
 
-func suffixModeEqualDateTimePattern(t *testing.T) {
+func TestSuffixModeEqualDateTimePattern(t *testing.T) {
 	if err := setUp(); err != nil {
 		panic(err)
 	}
+	defer tearDown()
 
 	var nameToDateTime = map[string]string{}
 	for _, n := range testFileNames {
@@ -161,10 +146,6 @@ func suffixModeEqualDateTimePattern(t *testing.T) {
 		if !fileExists(target) {
 			t.Fatalf("FAIL: %s\n", target)
 		}
-	}
-
-	if err := tearDown(); err != nil {
-		panic(err)
 	}
 }
 
